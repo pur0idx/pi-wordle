@@ -1,0 +1,12 @@
+# Raspberry Pi cluster: pull multi-arch images built by GitHub Actions.
+# Set the owner once with:  scripts/set-registry.sh <github-owner> [tag]
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - { name: kube-guess/frontend, newName: ghcr.io/CHANGE_ME/kube-guess-frontend, newTag: latest }
+  - { name: kube-guess/gateway, newName: ghcr.io/CHANGE_ME/kube-guess-gateway, newTag: latest }
+  - { name: kube-guess/word-service, newName: ghcr.io/CHANGE_ME/kube-guess-word-service, newTag: latest }
+  - { name: kube-guess/evaluator, newName: ghcr.io/CHANGE_ME/kube-guess-evaluator, newTag: latest }
+  - { name: kube-guess/hint-engine, newName: ghcr.io/CHANGE_ME/kube-guess-hint-engine, newTag: latest }

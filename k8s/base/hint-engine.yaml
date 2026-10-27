@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hint-engine
+  labels: { app.kubernetes.io/name: hint-engine, app.kubernetes.io/part-of: kube-guess }
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels: { app.kubernetes.io/name: hint-engine }
+  strategy:
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: hint-engine, app.kubernetes.io/part-of: kube-guess }
+    spec:
+      # Never put both replicas on the same Pi, so pulling any one Pi leaves
+      # a live replica. Honor taints so the control plane and a dead
+      # (unreachable-tainted) node are not counted as places to spread to.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          nodeTaintsPolicy: Honor
+          labelSelector:
+            matchLabels: { app.kubernetes.io/name: hint-engine }
+      # Default is 300s: Kubernetes would wait 5 minutes before replacing
+      # pods on a pulled Pi. 15s makes replacements show up in ~40s total.
+      tolerations:
+        - { key: node.kubernetes.io/unreachable, operator: Exists, effect: NoExecute, tolerationSeconds: 15 }
+        - { key: node.kubernetes.io/not-ready, operator: Exists, effect: NoExecute, tolerationSeconds: 15 }
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: hint-engine
+          image: kube-guess/hint-engine:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: 8080 }
+          env:
+            # Downward API: each service reports where it runs in "trace".
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: NODE_NAME
+              valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 3
+            failureThreshold: 2
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests: { cpu: 100m, memory: 96Mi }
+            limits: { memory: 256Mi }

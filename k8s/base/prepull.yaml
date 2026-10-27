@@ -1,0 +1,32 @@
+# Puts every app image on every worker ahead of time. At the demo there may
+# be no internet: a replacement pod scheduled onto a Pi that lacks its image
+# would sit in ImagePullBackOff. Each init container pulls one image and
+# exits immediately; the pause-like main container keeps the pod (and so the
+# cached images) around.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: image-prepull
+  labels: { app.kubernetes.io/name: image-prepull, app.kubernetes.io/part-of: kube-guess }
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: image-prepull }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: image-prepull }
+    spec:
+      terminationGracePeriodSeconds: 1
+      initContainers:
+        - { name: frontend, image: kube-guess/frontend:dev, imagePullPolicy: IfNotPresent, command: ["nginx", "-v"] }
+        - { name: gateway, image: kube-guess/gateway:dev, imagePullPolicy: IfNotPresent, command: ["python", "-c", "0"] }
+        - { name: word-service, image: kube-guess/word-service:dev, imagePullPolicy: IfNotPresent, command: ["/word-service", "-noop"] }
+        - { name: evaluator, image: kube-guess/evaluator:dev, imagePullPolicy: IfNotPresent, command: ["node", "-e", "0"] }
+        - { name: hint-engine, image: kube-guess/hint-engine:dev, imagePullPolicy: IfNotPresent, command: ["python", "-c", "0"] }
+      containers:
+        - name: hold
+          image: kube-guess/evaluator:dev
+          imagePullPolicy: IfNotPresent
+          command: ["node", "-e", "process.on('SIGTERM',()=>process.exit(0));setInterval(()=>{},1<<30)"]
+          resources:
+            requests: { cpu: 1m, memory: 8Mi }
+            limits: { memory: 32Mi }

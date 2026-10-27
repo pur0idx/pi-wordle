@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" font-family="-apple-system, Segoe UI, Roboto, sans-serif" font-size="13">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <style>
+      .svc { stroke-width: 1.5; rx: 10; }
+      .title { font-weight: 700; font-size: 15px; fill: #0f172a; }
+      .sub { fill: #475569; font-size: 12px; }
+      .flow { stroke: #475569; stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+      .label { fill: #334155; font-size: 11.5px; }
+      .replica { fill: #ffffff; stroke: #94a3b8; stroke-width: 1; rx: 4; }
+      .replica-t { fill: #475569; font-size: 10px; }
+    </style>
+  </defs>
+  <rect width="900" height="430" fill="#f8fafc"/>
+
+  <!-- cluster boundary -->
+  <rect x="150" y="20" width="735" height="355" rx="14" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="166" y="42" class="sub">k3s cluster · namespace kube-guess · master = notebook VM (control plane only) · workers = 5 Raspberry Pi 3B+</text>
+
+  <!-- browser -->
+  <rect x="15" y="160" width="110" height="70" rx="10" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="70" y="190" text-anchor="middle" class="title">Browser</text>
+  <text x="70" y="208" text-anchor="middle" class="sub">game state in</text>
+  <text x="70" y="222" text-anchor="middle" class="sub">localStorage</text>
+
+  <!-- frontend -->
+  <rect x="175" y="140" width="150" height="110" class="svc" fill="#ede9fe" stroke="#8b5cf6"/>
+  <text x="250" y="166" text-anchor="middle" class="title">frontend</text>
+  <text x="250" y="184" text-anchor="middle" class="sub">nginx + React</text>
+  <text x="250" y="200" text-anchor="middle" class="sub">NodePort :30080</text>
+  <rect x="190" y="212" width="56" height="24" class="replica"/><text x="218" y="228" text-anchor="middle" class="replica-t">pod @pi-a</text>
+  <rect x="254" y="212" width="56" height="24" class="replica"/><text x="282" y="228" text-anchor="middle" class="replica-t">pod @pi-b</text>
+
+  <!-- gateway -->
+  <rect x="380" y="140" width="150" height="110" class="svc" fill="#dbeafe" stroke="#3b82f6"/>
+  <text x="455" y="166" text-anchor="middle" class="title">gateway</text>
+  <text x="455" y="184" text-anchor="middle" class="sub">FastAPI · orchestrates</text>
+  <text x="455" y="200" text-anchor="middle" class="sub">retries · stitches trace</text>
+  <rect x="395" y="212" width="56" height="24" class="replica"/><text x="423" y="228" text-anchor="middle" class="replica-t">pod @pi-c</text>
+  <rect x="459" y="212" width="56" height="24" class="replica"/><text x="487" y="228" text-anchor="middle" class="replica-t">pod @pi-d</text>
+
+  <!-- word-service -->
+  <rect x="610" y="58" width="255" height="88" class="svc" fill="#fef3c7" stroke="#f59e0b"/>
+  <text x="625" y="82" class="title">word-service</text><text x="740" y="82" class="sub">Go</text>
+  <text x="625" y="100" class="sub">dictionary · validate · answer = HMAC(secret, id)</text>
+  <text x="625" y="116" class="sub">only service holding DAILY_SECRET</text>
+  <rect x="625" y="122" width="56" height="18" class="replica"/><text x="653" y="135" text-anchor="middle" class="replica-t">×2 pods</text>
+
+  <!-- evaluator -->
+  <rect x="610" y="158" width="255" height="88" class="svc" fill="#ccfbf1" stroke="#14b8a6"/>
+  <text x="625" y="182" class="title">evaluator</text><text x="710" y="182" class="sub">Node.js</text>
+  <text x="625" y="200" class="sub">colors (duplicate letters) · win/loss</text>
+  <text x="625" y="216" class="sub">hard mode · re-scores history</text>
+  <rect x="625" y="222" width="56" height="18" class="replica"/><text x="653" y="235" text-anchor="middle" class="replica-t">×2 pods</text>
+
+  <!-- hint-engine -->
+  <rect x="610" y="258" width="255" height="88" class="svc" fill="#fce7f3" stroke="#ec4899"/>
+  <text x="625" y="282" class="title">hint-engine</text><text x="725" y="282" class="sub">Python / NumPy</text>
+  <text x="625" y="300" class="sub">filter candidates · rank by entropy</text>
+  <text x="625" y="316" class="sub">CPU-heavy · never sees the answer</text>
+  <rect x="625" y="322" width="56" height="18" class="replica"/><text x="653" y="335" text-anchor="middle" class="replica-t">×2 pods</text>
+
+  <!-- flows -->
+  <path class="flow" d="M125,195 L173,195"/>
+  <path class="flow" d="M325,195 L378,195"/>
+  <text x="352" y="186" text-anchor="middle" class="label">/api/*</text>
+  <path class="flow" d="M530,170 C570,170 570,102 608,102"/>
+  <text x="560" y="128" class="label">today, guess</text>
+  <path class="flow" d="M530,200 L608,200"/>
+  <text x="547" y="194" class="label">guess</text>
+  <path class="flow" d="M530,228 C570,228 570,302 608,302"/>
+  <text x="566" y="282" class="label">hint</text>
+
+  <!-- legend -->
+  <text x="20" y="400" class="sub">Every Deployment: 2 replicas spread across different Pis · pods evicted 15s after their node is declared dead (20s) · images pre-pulled on every Pi · CoreDNS pinned to the master</text>
+</svg>

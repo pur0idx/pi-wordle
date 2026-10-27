@@ -1,0 +1,35 @@
+# Fastest way to run the whole app on one machine (no Kubernetes):
+#   docker compose up --build      ->  http://localhost:8080
+# Service names match the Kubernetes Service names, so the same default
+# URLs (http://word-service:8080, ...) work in both.
+services:
+  frontend:
+    build: { context: ., dockerfile: services/frontend/Dockerfile }
+    image: kube-guess/frontend:dev
+    ports: ["8080:8080"]
+    environment: { NODE_NAME: compose }
+    depends_on: [gateway]
+
+  gateway:
+    build: { context: ., dockerfile: services/gateway/Dockerfile, target: runtime }
+    image: kube-guess/gateway:dev
+    ports: ["8000:8000"]  # exposed only so `npm run dev` can reach it
+    environment: { NODE_NAME: compose }
+    depends_on: [word-service, evaluator, hint-engine]
+
+  word-service:
+    build: { context: ., dockerfile: services/word-service/Dockerfile }
+    image: kube-guess/word-service:dev
+    environment:
+      NODE_NAME: compose
+      DAILY_SECRET: ${DAILY_SECRET:-local-dev-secret}
+
+  evaluator:
+    build: { context: ., dockerfile: services/evaluator/Dockerfile }
+    image: kube-guess/evaluator:dev
+    environment: { NODE_NAME: compose }
+
+  hint-engine:
+    build: { context: ., dockerfile: services/hint-engine/Dockerfile, target: runtime }
+    image: kube-guess/hint-engine:dev
+    environment: { NODE_NAME: compose }

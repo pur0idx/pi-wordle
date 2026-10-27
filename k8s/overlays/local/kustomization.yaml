@@ -1,0 +1,6 @@
+# Local k3d cluster: images are built on this machine and imported straight
+# into every k3d node (scripts/local-up.sh), so the base names are used as-is.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base

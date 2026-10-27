@@ -1,0 +1,12 @@
+{
+  "_comment": "Shared scoring vectors. evaluator (Node) and hint-engine (Python) both test against this file so their scoring can never drift apart. G = right letter right spot, Y = in word wrong spot, B = not in word (or already used up by other matches).",
+  "vectors": [
+    { "guess": "crane", "answer": "crane", "pattern": "GGGGG" },
+    { "guess": "crane", "answer": "slate", "pattern": "BBGBG" },
+    { "guess": "speed", "answer": "abide", "pattern": "BBYBY" },
+    { "guess": "eerie", "answer": "there", "pattern": "YBYBG" },
+    { "guess": "lolly", "answer": "allow", "pattern": "YYGBB" },
+    { "guess": "abbey", "answer": "babes", "pattern": "YYGGB" },
+    { "guess": "array", "answer": "rayon", "pattern": "YYBBY" }
+  ]
+}

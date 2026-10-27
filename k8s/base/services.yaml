@@ -1,0 +1,39 @@
+# Internal services: reachable only inside the cluster by DNS name
+# (http://word-service:8080 ...). The browser only ever talks to frontend.
+apiVersion: v1
+kind: Service
+metadata: { name: gateway }
+spec:
+  selector: { app.kubernetes.io/name: gateway }
+  ports: [{ name: http, port: 8000, targetPort: http }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: word-service }
+spec:
+  selector: { app.kubernetes.io/name: word-service }
+  ports: [{ name: http, port: 8080, targetPort: http }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: evaluator }
+spec:
+  selector: { app.kubernetes.io/name: evaluator }
+  ports: [{ name: http, port: 8080, targetPort: http }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: hint-engine }
+spec:
+  selector: { app.kubernetes.io/name: hint-engine }
+  ports: [{ name: http, port: 8080, targetPort: http }]
+---
+# The only public entry point. A NodePort is open on every node, including
+# the master; point browsers at the master's IP because it is never pulled.
+apiVersion: v1
+kind: Service
+metadata: { name: frontend }
+spec:
+  type: NodePort
+  selector: { app.kubernetes.io/name: frontend }
+  ports: [{ name: http, port: 80, targetPort: http, nodePort: 30080 }]
