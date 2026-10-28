@@ -6,7 +6,7 @@ ARG TARGETOS TARGETARCH
 WORKDIR /src
 COPY services/word-service/go.mod ./
 COPY services/word-service/*.go ./
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags="-s -w" -o /out/word-service .
+RUN --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags="-s -w" -o /out/word-service .
 
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /out/word-service /word-service

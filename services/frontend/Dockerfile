@@ -4,7 +4,7 @@
 FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 WORKDIR /src
 COPY services/frontend/package.json services/frontend/package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 COPY services/frontend/ ./
 RUN npm run build
 

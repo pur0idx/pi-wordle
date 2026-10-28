@@ -9,8 +9,8 @@ if command -v go >/dev/null; then (cd services/word-service && go test ./...)
 else docker run --rm -v "$PWD/services/word-service:/src" -w /src golang:1.24-alpine go test ./...; fi
 
 echo "==> evaluator (node --test)"
-if command -v node >/dev/null; then (cd services/evaluator && node --test test/)
-else docker run --rm -v "$PWD:/repo" -w /repo/services/evaluator node:22-alpine node --test test/; fi
+if command -v node >/dev/null; then (cd services/evaluator && node --test)
+else docker run --rm -v "$PWD:/repo" -w /repo/services/evaluator node:22-alpine node --test; fi
 
 for svc in gateway hint-engine; do
   echo "==> $svc (pytest in docker)"

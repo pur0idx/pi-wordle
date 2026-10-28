@@ -91,7 +91,7 @@ h1 { margin: 0; font-size: 1.5rem; letter-spacing: 0.02em; }
 .key.wide { max-width: 68px; flex: 1.5; font-size: 0.75rem; }
 .key.correct { background: var(--correct); color: #fff; }
 .key.present { background: var(--present); color: #fff; }
-.key.absent { background: var(--absent); color: #fff; opacity: 0.75; }
+.key.absent { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1px var(--panel-border); text-decoration: line-through; opacity: 0.6; }
 .keyboard.disabled .key { pointer-events: none; opacity: 0.6; }
 
 .side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
