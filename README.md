@@ -64,18 +64,25 @@ Full walkthrough: [docs/local-testing.md](docs/local-testing.md).
 
 ## On the Raspberry Pi cluster
 
+After the physical setup (router, master VM, flashed Pis), one command on
+your Mac builds the cluster and deploys:
+
 ```bash
-# master (Ubuntu VM on a notebook, bridged network)
-cluster/master-install.sh
-# each Pi
-sudo MASTER_IP=<master-ip> cluster/pi-prep.sh pi-1 && sudo reboot
-MASTER_IP=<master-ip> K3S_TOKEN=<token> cluster/join-worker.sh
-# master again
-scripts/set-registry.sh <github-owner>
+cp cluster/hosts.example.env cluster/hosts.env   # master IP, Pi names
+scripts/cluster-up.sh
+```
+
+From then on, **every push to `main` is tested, built for arm64, and rolled out
+to the Pis automatically** by GitHub Actions, through a runner on the master.
+To deploy by hand (this is the demo-day command):
+
+```bash
+export KUBECONFIG=~/.kube/pi-cluster
 scripts/deploy.sh pi
 ```
 
-Step-by-step guide: [docs/cluster-setup.md](docs/cluster-setup.md).
+Guides: [docs/automation.md](docs/automation.md) (one command and push-to-deploy) ·
+[docs/cluster-setup.md](docs/cluster-setup.md) (every step by hand).
 
 ## Documentation
 
@@ -84,6 +91,7 @@ Step-by-step guide: [docs/cluster-setup.md](docs/cluster-setup.md).
 | [docs/architecture.md](docs/architecture.md) | Why the system is split this way, statelessness, fault-tolerance design, algorithms |
 | [docs/api.md](docs/api.md) | Every public and internal endpoint, with examples |
 | [docs/local-testing.md](docs/local-testing.md) | Running and breaking the cluster on a laptop with k3d |
+| [docs/automation.md](docs/automation.md) | One-command cluster build (`scripts/cluster-up.sh`) and push-to-deploy via GitHub Actions |
 | [docs/cluster-setup.md](docs/cluster-setup.md) | Building the Raspberry Pi cluster from scratch and deploying to it |
 | [docs/demo-runbook.md](docs/demo-runbook.md) | Demo-day script, mapped line by line to the grading rubric |
 

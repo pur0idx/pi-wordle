@@ -16,9 +16,17 @@ LAN_CIDR="${LAN_CIDR:-$(echo "$MASTER_IP" | awk -F. '{print $1"."$2"."$3".0/24"}
 
 echo "==> master IP $MASTER_IP, LAN $LAN_CIDR, k3s $K3S_VERSION"
 
+# Lets scripts/cluster-up.sh (and the GitHub runner installer) run sudo over
+# SSH without a password prompt. Acceptable on a single-purpose lab VM.
+if [[ ! -f /etc/sudoers.d/kube-guess ]]; then
+  echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/kube-guess >/dev/null
+  sudo chmod 440 /etc/sudoers.d/kube-guess
+fi
+
 echo "==> chrony (NTP server for the Pis)"
 sudo apt-get update -qq
-sudo apt-get install -y -qq chrony curl
+# bsdextrautils provides `column`, used by scripts/where.sh
+sudo apt-get install -y -qq chrony curl bsdextrautils
 sudo tee /etc/chrony/conf.d/kube-guess.conf >/dev/null <<CONF
 allow $LAN_CIDR
 # keep serving time even when this VM has no upstream NTP (offline demo)
@@ -44,6 +52,8 @@ mkdir -p ~/.kube
 sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 sudo chown "$(id -u):$(id -g)" ~/.kube/config
 sed -i "s#https://127.0.0.1:6443#https://$MASTER_IP:6443#" ~/.kube/config
+# User-readable copy of the join token, fetched by scripts/cluster-up.sh.
+sudo install -m 600 -o "$(id -u)" -g "$(id -g)" /var/lib/rancher/k3s/server/node-token ~/.kube/node-token
 
 echo
 echo "k3s server is up. Join each Pi with:"

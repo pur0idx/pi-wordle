@@ -1,6 +1,9 @@
-# On every push to main: run all tests, then build multi-arch images
+dev.py up --skip-metabase# On every push to main: run all tests, then build multi-arch images
 # (arm64 for the Pis, amd64 for x86 notebooks) and push them to GHCR as
 #   ghcr.io/<owner>/kube-guess-<service>:latest and :<git-sha>
+# then deploy that exact <git-sha> to the Pi cluster through the self-hosted
+# runner on the master VM (installed by scripts/cluster-up.sh, which also sets
+# the repository variable DEPLOY_TO_PI=true; until then the job is skipped).
 name: build
 
 on:
@@ -54,3 +57,17 @@ jobs:
             ${{ steps.name.outputs.image }}:${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  deploy:
+    needs: images
+    if: github.event_name != 'pull_request' && vars.DEPLOY_TO_PI == 'true'
+    # GitHub's own runners cannot reach the Pi LAN; this one runs on the master.
+    runs-on: [self-hosted, kube-guess]
+    concurrency: { group: deploy-pi, cancel-in-progress: false }
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: scripts/deploy.sh pi
+        env:
+          IMAGE_OWNER: ${{ github.repository_owner }}
+          IMAGE_TAG: ${{ github.sha }}

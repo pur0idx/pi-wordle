@@ -3,6 +3,11 @@
 Following these steps, anyone with the course kit can build the cluster from
 scratch and deploy Kube Guess on it.
 
+> **Shortcut:** steps 2.3 to 5 (installing k3s, preparing and joining every
+> Pi, deploying) are automated by `scripts/cluster-up.sh`; see
+> [automation.md](automation.md). This page documents every step by hand, so
+> you can follow or debug what the script does.
+
 ## Hardware (per group)
 
 - 1 × TP-Link TL-WR841N router
@@ -114,11 +119,10 @@ and `:<git-sha>`.
      The repository itself stays private.
    - **Pull secret**: create a classic personal access token with `read:packages`, then
      `export GHCR_USER=<github-user> GHCR_TOKEN=<token>` before running `deploy.sh`.
-3. Point the Pi overlay at your registry (once, then commit):
-
-   ```bash
-   scripts/set-registry.sh <github-owner>            # or: <owner> <git-sha> to pin a build
-   ```
+3. Nothing to configure: `deploy.sh pi` takes the image owner from `git remote origin`
+   and the newest successful build's commit as the tag (see
+   [automation.md](automation.md#how-deploysh-pi-picks-images)). To pin a tag in
+   git instead: `scripts/set-registry.sh <github-owner> <git-sha>`.
 
 Without GitHub Actions, you can build and push from any machine with Docker buildx:
 
