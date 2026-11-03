@@ -74,7 +74,14 @@ ensure_key_access() {  # target
   can_ssh "$1" && return 0
   echo "  $1 does not accept your SSH key yet; installing it (enter that machine's password)"
   ssh-copy-id -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$1" >/dev/null
-  can_ssh "$1"
+  can_ssh "$1" && return 0
+  # Reachable, but the server never offers "publickey" (disabled in sshd_config).
+  if ssh "${SSH_OPTS[@]}" -v "$1" true 2>&1 | grep 'Authentications that can continue' | grep -qv publickey; then
+    echo "  $1 has SSH key login disabled. On that machine run:"
+    echo "    printf 'PubkeyAuthentication yes\\nAuthenticationMethods any\\n' | sudo tee /etc/ssh/sshd_config.d/00-kube-guess.conf"
+    echo "    sudo systemctl restart ssh"
+  fi
+  return 1
 }
 
 # ---------------------------------------------------------------- 1. preflight

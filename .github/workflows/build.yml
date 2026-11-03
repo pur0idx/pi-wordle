@@ -1,4 +1,4 @@
-dev.py up --skip-metabase# On every push to main: run all tests, then build multi-arch images
+# On every push to main: run all tests, then build multi-arch images
 # (arm64 for the Pis, amd64 for x86 notebooks) and push them to GHCR as
 #   ghcr.io/<owner>/kube-guess-<service>:latest and :<git-sha>
 # then deploy that exact <git-sha> to the Pi cluster through the self-hosted
